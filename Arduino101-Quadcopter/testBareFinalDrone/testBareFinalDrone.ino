@@ -37,9 +37,8 @@ void setup() {
 #ifdef DEBUG
     Serial.println("CurieIMU not found!");
 #endif
-    digitalWrite(warningLED, HIGH); //Turn on warningLED
+    digitalWrite(warningLED, !digitalRead(warningLED)); //Toggle warningLED
     delay(250);
-    digitalWrite(warningLED, LOW); //Turn off warningLED
   }
 #ifdef DEBUG
   Serial.println("CurieIMU found!");
