@@ -43,12 +43,11 @@ void setup() {
 
   //If the MPU-9150 is connected, go on. Else, blink the warning LED.
   while (!moveMeter.testMPUConnection()) {
-    digitalWrite(warningLED, HIGH); //Turn on warningLED
+    digitalWrite(warningLED, !digitalRead(warningLED); //Toggle warningLED
 #ifdef DEBUG
     Serial.println("MPU-9150 not found!");
 #endif
     delay(250);
-    digitalWrite(warningLED, LOW); //Turn off warningLED
   }
 #ifdef DEBUG
   Serial.println("MPU-9150 found!");
