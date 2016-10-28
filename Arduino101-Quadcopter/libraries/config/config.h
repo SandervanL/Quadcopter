@@ -2,13 +2,13 @@
 	#define CONFIG_DRONE_H
 //#define DEBUG
 //General constants
-static const double timeConstant = 0.0036; //Time constant between loops: 3500 microseconds
+static const double timeConstant = 0.0036; //Time constant between loops: 3600 microseconds
 static const uint8_t warningLED = 13;//The port where the warning LED has to be connected to
 static const uint8_t timePort = 12;//The port which switches high and low to be able to measure the refresh rate with another arduino
 
 //MoveMeter constants
 static const double compCoeff = 0.9f;
-static const double gyroSensitivity = 50.0f;
+static const double gyroSensitivity = 50.0f131.2; //http://www.mouser.com/ds/2/783/BST-BMI160-DS000-07-786474.pdf
 
 static const int16_t accelXOffset = -2886;//-2904;
 static const int16_t accelYOffset = -341;//-339;
