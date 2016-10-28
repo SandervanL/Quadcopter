@@ -4,7 +4,7 @@ Calculator::Calculator() {};
 
 Calculator::~Calculator() {};
 
-void Calculator::PIDPitchRoll(volatile uint16_t signals[], double *mpuPitch, double *mpuRoll, double *outputPitch, double *outputRoll) {
+void Calculator::PIDPitchRoll(volatile uint16_t signals[], double mpuPitch, double mpuRoll, int16_t &outputPitch, int16_t &outputRoll) {
 	if (signals[rollChannel] > 1460 && signals[rollChannel] < 1500) {
 		signals[rollChannel] = 1478; // (radioLowLimit + radioHighLimit) / 2
 	}
@@ -28,33 +28,33 @@ void Calculator::PIDPitchRoll(volatile uint16_t signals[], double *mpuPitch, dou
 		remotePitch = pitchMaxAngle * -1;
 	}
 	
-	double currentError = (*mpuPitch - remotePitch);
-	pitchErrorSum += currentError;
+	int16_t currentError = (mpuPitch - remotePitch);
+	pitchErrorSum += currentError * timeConstant * pitchIGain;
 	if (pitchErrorSum > pitchMaxValue) {
 		pitchErrorSum = pitchMaxValue;
 	} else if (pitchErrorSum < pitchMaxValue * -1) {
 		pitchErrorSum = pitchMaxValue * -1;
 	};
-	*outputPitch = pitchPGain * currentError + pitchIGain * timeConstant * pitchErrorSum + pitchDGain * (currentError - lastPitchError) / timeConstant;
-	if (*outputPitch > pitchMaxValue) {
-		*outputPitch = pitchMaxValue;
-	} else if (*outputPitch < pitchMaxValue * -1) {
-		*outputPitch = pitchMaxValue * -1;
+	outputPitch = pitchPGain * currentError + pitchErrorSum + pitchDGain * (currentError - lastPitchError) / timeConstant;
+	if (outputPitch > pitchMaxValue) {
+		outputPitch = pitchMaxValue;
+	} else if (outputPitch < pitchMaxValue * -1) {
+		outputPitch = pitchMaxValue * -1;
 	};
 	lastPitchError = currentError;
 	
-	currentError = *mpuRoll - remoteRoll;
+	currentError = mpuRoll - remoteRoll;
 	rollErrorSum += currentError;
 	if (rollErrorSum > rollMaxValue) {
 		rollErrorSum = rollMaxValue;
 	} else if (rollErrorSum < rollMaxValue * -1) {
 		rollErrorSum = rollMaxValue * -1;
 	};
-	*outputRoll = rollPGain * currentError + pitchIGain * timeConstant * rollErrorSum + rollDGain * (currentError - lastRollError) / timeConstant;
-	if (*outputRoll > rollMaxValue) {
-		*outputRoll = rollMaxValue;
-	} else if (*outputRoll < rollMaxValue * -1) {
-		*outputRoll = rollMaxValue * -1;
+	outputRoll = rollPGain * currentError + pitchIGain * timeConstant * rollErrorSum + rollDGain * (currentError - lastRollError) / timeConstant;
+	if (outputRoll > rollMaxValue) {
+		outputRoll = rollMaxValue;
+	} else if (outputRoll < rollMaxValue * -1) {
+		outputRoll = rollMaxValue * -1;
 	};
 	lastRollError = currentError;
 };

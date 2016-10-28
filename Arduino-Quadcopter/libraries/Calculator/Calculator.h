@@ -5,7 +5,7 @@ class Calculator {
 public:
 	Calculator();
 	~Calculator();
-	void PIDPitchRoll(volatile uint16_t signals[], double *mpuPitch, double *mpuRoll, double *outputPitch, double *outputRoll);
+	void PIDPitchRoll(volatile uint16_t signals[], double mpuPitch, double mpuRoll, int16_t &outputPitch, int16_t &outputRoll);
 	int PIDHeight(double *height);
 	void resetHeightParameters();
 	void resetPitchRollParameters();
@@ -13,7 +13,7 @@ public:
 	
 	
 private:
-	double lastRollError, lastPitchError;
+	int16_t lastRollError, lastPitchError;
 	double rollErrorSum, pitchErrorSum;
 	double lastHeightError;
 	double heightErrorSum;
