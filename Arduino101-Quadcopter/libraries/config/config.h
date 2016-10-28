@@ -8,7 +8,7 @@ static const uint8_t timePort = 12;//The port which switches high and low to be 
 
 //MoveMeter constants
 static const double compCoeff = 0.9f;
-static const double gyroSensitivity = 50.0f131.2; //http://www.mouser.com/ds/2/783/BST-BMI160-DS000-07-786474.pdf
+static const double gyroSensitivity = 131.2; //http://www.mouser.com/ds/2/783/BST-BMI160-DS000-07-786474.pdf
 
 static const int16_t accelXOffset = -2886;//-2904;
 static const int16_t accelYOffset = -341;//-339;
