@@ -39,32 +39,31 @@ void Motors::staySilent() {
 	if (motorsStarted) {
 		stopAll();
 	} else {
-		uint16_t outputSignal = escLowLimit + 50;
-		outputAll(&outputSignal, 0, 0, 0);
+		outputAll(escLowLimit + 50, 0, 0, 0);
 	}
 };
 
-void Motors::outputBackLeft(uint16_t *duration) {
+void Motors::outputBackLeft(uint16_t duration) {
 	PORTD |= B00010000;				//Turn on pin 4
-	delayMicroseconds(*duration);
+	delayMicroseconds(duration);
 	PORTD &= B11101111;				//Turn off pin 4
 };
 
-void Motors::outputFrontLeft(uint16_t *duration) {
+void Motors::outputFrontLeft(uint16_t duration) {
 	PORTD |= B00100000;				//Turn on pin 5
-	delayMicroseconds(*duration);
+	delayMicroseconds(duration);
 	PORTD &= B11011111;				//Turn off pin 5
 };
 
-void Motors::outputBackRight(uint16_t *duration) {
+void Motors::outputBackRight(uint16_t duration) {
 	PORTD |= B01000000;				//Turn on pin 6
-	delayMicroseconds(*duration);
+	delayMicroseconds(duration);
 	PORTD &= B10111111;				//Turn off pin 6
 };
 
-void Motors::outputFrontRight(uint16_t *duration) {
+void Motors::outputFrontRight(uint16_t duration) {
 	PORTD |= B10000000;				//Turn on pin 7
-	delayMicroseconds(*duration);
+	delayMicroseconds(duration);
 	PORTD &= B01111111;				//Turn off pin 7
 };
 
