@@ -1,4 +1,3 @@
-//#define DEBUGo
 #include "config.h"        //File containing all the constants needed to run
 #include <Wire.h>             //Dumb I2C library
 #include <I2Cdev.h>           //Smart I2C library (depends on Wire.h)
@@ -91,7 +90,7 @@ void loop() {
     startState = 0; //By setting startState to 0, the motors are stopped at the end of the loop
   };
 
-  moveMeter.getPitchRoll(&mpuPitch, &mpuRoll);//Get pitch and roll (in degrees)
+  moveMeter.getPitchRoll(mpuPitch, mpuRoll);//Get pitch and roll (in degrees)
   mpuPitch *= -1.0;                             //Compensate for placing the MPU9150 the other way around
   mpuRoll  *= -1.0;
 
@@ -126,18 +125,18 @@ void loop() {
   //MPUPitch and MPURoll are taken care of in the MoveMeter library
   Serial.print(mpuPitch);                     Serial.print(",");
   Serial.print(mpuRoll);                      Serial.print(",");
-  Serial.print(throttle + Pitch - Roll + Yaw);Serial.print(",");
-  Serial.print(throttle + Pitch + Roll - Yaw);Serial.print(",");
-  Serial.print(throttle - Pitch - Roll - Yaw);Serial.print(",");
-  Serial.print(throttle - Pitch + Roll + Yaw);Serial.print(",");
+  Serial.print(throttle + pitch - roll + yaw);Serial.print(",");
+  Serial.print(throttle + pitch + roll - yaw);Serial.print(",");
+  Serial.print(throttle - pitch - roll - yaw);Serial.print(",");
+  Serial.print(throttle - pitch + roll + yaw);Serial.print(",");
   Serial.print(signals[throttleChannel]);     Serial.print(",");
   Serial.print(signals[pitchChannel]);        Serial.print(",");
   Serial.print(signals[rollChannel]);         Serial.print(",");
   Serial.print(signals[yawChannel]);          Serial.print(",");
   Serial.print(throttle);                     Serial.print(",");
-  Serial.print(Pitch);                        Serial.print(",");
-  Serial.print(Roll);                         Serial.print(",");
-  Serial.print(Yaw);                          Serial.print(",");
+  Serial.print(pitch);                        Serial.print(",");
+  Serial.print(roll);                         Serial.print(",");
+  Serial.print(yaw);                          Serial.print(",");
   Serial.println(startState);
 #endif
 };

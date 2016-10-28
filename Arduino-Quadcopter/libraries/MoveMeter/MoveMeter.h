@@ -17,7 +17,7 @@ class MoveMeter {
 		double getRoll();
 //		double getYaw();
 		//If you use this function, only use this function
-		void getPitchRoll(double *pitch, double *roll);
+		void getPitchRoll(double &pitch, double &roll);
 //		void getPitchRollYaw(double *pitch, double *roll, double *yaw);
 //		void getPitchRollYaw(double *pry);
 	
@@ -29,4 +29,5 @@ class MoveMeter {
 		uint32_t pitchTimer, rollTimer; /*yawTimer,*/
 		void ComplementaryPitch(double dt);
 		void ComplementaryRoll (double dt);
+		bool firstAngle;
 };
