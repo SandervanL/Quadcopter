@@ -7,15 +7,9 @@
 #include <Calculator.h>       //Library for PID calculations
 #include <Motors.h>           //Library for output to motors
 
-int16_t Pitch;
-int16_t Roll;
-int16_t Yaw;
-
-
 
 //Radio control variables, micros() returns a uint32_t
 volatile uint16_t signals[8];   //Array which contains the signals of the remote control in microseconds (updated by ISR(PCINT_vect))
-volatile bool     signalHigh[8];           //Byte with wich can be checked if a signal is high by bit checking.... or ... //Array of flags to see if a signal went from high to low or the other way around
 volatile uint32_t signalBegin[8];        //Array with beginvalues of the remote-control signals
 volatile uint32_t currentMicroTime;      //Variable used by ISR(PCINT0_vect) to store the current time in
 
@@ -27,8 +21,9 @@ MoveMeter     moveMeter;            //Instance of the MPU
 double mpuPitch, mpuRoll;             //Variables for the mpu and height, we store lastHeight for our algorithm in loop()
 uint32_t lastTime;                     //To store the time the last loop ended
 uint16_t throttle;
-double pitch, yaw, roll;                           //The final output variables throttle in microseconds, pitch in PID, yaw in (% - 50), roll in PID
+int16_t pitch, yaw, roll;                           //The final output variables throttle in microseconds, pitch in PID, yaw in (% - 50), roll in PID
 uint8_t startState = 0;                                      //The startState determines if the quad is ready to start (throttle low and yaw left = 1, throttle low and yaw middle = 2 = begin flying)
+uint32_t beginTimeOfNextLoop = 0;     //Stores the time at which the next loop should start
 
 void setup() {
 #ifdef DEBUG
@@ -43,7 +38,7 @@ void setup() {
 
   //If the MPU-9150 is connected, go on. Else, blink the warning LED.
   while (!moveMeter.testMPUConnection()) {
-    digitalWrite(warningLED, !digitalRead(warningLED); //Toggle warningLED
+    digitalWrite(warningLED, !digitalRead(warningLED)); //Toggle warningLED
 #ifdef DEBUG
     Serial.println("MPU-9150 not found!");
 #endif
@@ -79,7 +74,7 @@ void loop() {
   //If timePort is low (digitalRead(timePort)), we set timePort high (PINx | (1 << PINx)), else we set the port low (PORTx | (1 << PB4))
   //Now, timePort = PB4 = 12
   while (micros() < beginTimeOfNextLoop) {
-    delayMicroSeconds(2);
+    delayMicroseconds(2);
   }
   beginTimeOfNextLoop = micros() + (uint32_t)(timeConstant * 1000000.0);
   PORTB = PINB & (1 << PB4) ? PORTB & ~(1 << PB4) : PORTB | (1 << PB4);
@@ -106,7 +101,7 @@ void loop() {
   //I don't use return, because I may want to DEBUG
   if (startState == 2 && throttle > 1080) {
     //Only compute PID when we have input; we don't want the PID to keep trying to correct while we don't output any signal
-    calculator.PIDPitchRoll(signals, &mpuPitch,&mpuRoll, &pitch, &roll); //Calculate the wanted pitch and roll output
+    calculator.PIDPitchRoll(signals, mpuPitch, mpuRoll, pitch, roll); //Calculate the wanted pitch and roll output
 
     //Calculate the throttle and yaw from the remote control
     //throttleChannel, throttleLowLimit, throttleHighLimit, yawChannel, radioLowLimit and radioHighLimit are defined in Calculator.h
@@ -122,10 +117,7 @@ void loop() {
     } else if (yaw < yawMaxValue * -1) {
       yaw = yawMaxValue * -1;
     }
-    Pitch = (int16_t) pitch;
-    Roll = (int16_t) roll;
-    Yaw = (int16_t) yaw;
-    motors.outputAll(&throttle, &Pitch, &Roll, &Yaw);
+    motors.outputAll(throttle, pitch, roll, yaw);
   } else {
     motors.staySilent();
   }
@@ -153,43 +145,39 @@ void loop() {
 ISR (PCINT1_vect) {
   currentMicroTime = micros();
   //Channel 1
-  if ((PINC & B00000001) == 0) {                  //Is input 8 high?
-    if (!signalHigh[0]) {               //Input 8 changed from 0 to 1
-      signalHigh[0] = true;             //Remember channel 1 is high
-      signalBegin[0] = currentMicroTime;        //Remember the beginning of the pulse
+  if ((PINC & B00000001) == 0) {              //Is input 8 high?
+    if (!signalBegin[0]) {                    //Input 8 changed from 0 to 1
+      signalBegin[0] = currentMicroTime;      //Remember the beginning of the pulse
     };
-  } else if (signalHigh[0]) {               //Input 8 is not high and changed from 1 to 0
-    signalHigh[0] = false;                //Remember channel 1 is now low
-    signals[0] = currentMicroTime - signalBegin[0];   //Channel 1 is current time - begin time
+  } else if (signalBegin[0]) {               //Input 8 is not high and changed from 1 to 0
+    signals[0] = currentMicroTime - signalBegin[0]; //Channel 1 is current time - begin time
+    signalBegin[0] = 0;                       //Remember channel 1 is now low
   };
   //Channel 2
-  if ((PINC & B00000010) == 0) {                //Is input 9 high?
-    if (!signalHigh[1]) {               //Input 9 changed from 0 to 1
-      signalHigh[1] = true;             //Remember channel 2 is now high
-      signalBegin[1] = currentMicroTime;        //Remember the beginning of the pulse
+  if ((PINC & B00000010) == 0) {              //Is input 9 high?
+    if (!signalBegin[1]) {                    //Input 9 changed from 0 to 1
+      signalBegin[1] = currentMicroTime;      //Remember the beginning of the pulse
     };
-  } else if (signalHigh[1]) {               //Input 9 is not high and changed from 1 to 0
-    signalHigh[1] = false;                //Remember channel 2 is now low
-    signals[1] = currentMicroTime - signalBegin[1];   //Channel 2 is current time - begin time
+  } else if (signalBegin[1]) {                //Input 9 is not high and changed from 1 to 0
+    signals[1] = currentMicroTime - signalBegin[1];//Channel 2 is current time - begin time
+    signalBegin[1] = 0;                       //Remember channel 2 is now low
   };
   //Channel 3
-  if ((PINC & B00000100) == 0) {               //Is input 10 high?
-    if (!signalHigh[2]) {               //Input 10 changed from 0 to 1
-      signalHigh[2] = true;             //Remember channel 3 is now high
-      signalBegin[2] = currentMicroTime;        //Remember the beginning of the pulse
+  if ((PINC & B00000100) == 0) {              //Is input 10 high?
+    if (!signalBegin[2]) {                    //Input 10 changed from 0 to 1
+      signalBegin[2] = currentMicroTime;      //Remember the beginning of the pulse
     };
-  } else if (signalHigh[2]) {               //Input 10 is not high and changed from 1 to 0
-    signalHigh[2] = false;                //Remember channel 3 is now low
-    signals[2] = currentMicroTime - signalBegin[2];   //Channel 3 is current time - begin time
+  } else if (signalBegin[2]) {                //Input 10 is not high and changed from 1 to 0
+    signals[2] = currentMicroTime - signalBegin[2];//Channel 3 is current time - begin time
+    signalBegin[2] = 0;                       //Remember channel 3 is now low
   };
   //Channel 4
-  if ((PINC & B00001000) == 0) {                //Is input 11 high?
-    if (!signalHigh[3]) {               //Input 11 changed from 0 to 1
-      signalHigh[3] = true;             //Remember channel 3 is now high
-      signalBegin[3] = currentMicroTime;        //Remember the beginning of the pulse
+  if ((PINC & B00001000) == 0) {              //Is input 11 high?
+    if (!signalBegin[3]) {                    //Input 11 changed from 0 to 1
+      signalBegin[3] = currentMicroTime;      //Remember the beginning of the pulse
     };
-  } else if (signalHigh[3]) {               //Input 11 is not high and changed from 1 to 0
-    signalHigh[3] = false;                //Remember channel 4 is now low
-    signals[3] = currentMicroTime - signalBegin[3];   //Channel 4 is current time - begin time
+  } else if (signalBegin[3]) {                 //Input 11 is not high and changed from 1 to 0
+    signals[3] = currentMicroTime - signalBegin[3];//Channel 4 is current time - begin time
+    signalBegin[3] = 0;                       //Remember channel 4 is now low
   };
 }
