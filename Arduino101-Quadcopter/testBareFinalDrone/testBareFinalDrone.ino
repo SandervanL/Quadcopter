@@ -33,11 +33,16 @@ void setup() {
   pinMode(warningLED, OUTPUT);
    
   //If the CurieIMU is connected, go on. Else, blink the warning LED.
+  uint8_t warningLEDState = 0;
   while (!moveMeter.testConnection()) {
 #ifdef DEBUG
     Serial.println("CurieIMU not found!");
 #endif
-    digitalWrite(warningLED, !digitalRead(warningLED)); //Toggle warningLED
+    if (++warningLEDState % 2) {
+      setPort13High();
+    } else {
+      setPort13Low();
+    }
     delay(250);
   }
 #ifdef DEBUG
@@ -76,8 +81,12 @@ void loop() {
   beginTimeOfNextLoop = micros() + (uint32_t)(timeConstant * 1000000.0); //Set time next loop can start
   
 #ifdef DEBUG
-  //Toggle timePort so the cycle length can be measured with an oscilloscope.
-  digitalWrite(timePort, ++timePortState % 2);
+  //Toggle timePort 12 so the cycle length can be measured with an oscilloscope.
+  if (++timePortState % 2) {
+    setPort12High();
+  } else {
+    setPort12Low();
+  }
 #endif
 
   //If the throttle stick is low and yaw is left, we are going to wait for it to go to the middle

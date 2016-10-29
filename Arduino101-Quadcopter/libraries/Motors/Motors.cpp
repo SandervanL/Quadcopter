@@ -5,6 +5,7 @@ FRONT_LEFT 5
 BACK_RIGHT 6
 FRONT_RIGHT 7
 */
+
 Motors::Motors(){
 	motorsStarted = false;
 };
@@ -20,30 +21,30 @@ void Motors::initialize() {
 void Motors::startAll() {
 	uint32_t begin = micros();
 	while (micros() - begin <= escArmMicros) {
-		digitalWrite(4, HIGH);
-		digitalWrite(5, HIGH);
-		digitalWrite(6, HIGH);
-		digitalWrite(7, HIGH);
+		setPort4High();
+		setPort5High();
+		setPort6High();
+		setPort7High();
 		delayMicroseconds(escLowLimit - 100);
-		digitalWrite(4, LOW);
-		digitalWrite(5, LOW);
-		digitalWrite(6, LOW);
-		digitalWrite(7, LOW);
+		setPort4Low();
+		setPort5Low();
+		setPort6Low();
+		setPort7Low();
 		delayMicroseconds(1000);
 	};
 	motorsStarted = true;
 };
 
 void Motors::stopAll() {
-	digitalWrite(4, HIGH);
-	digitalWrite(5, HIGH);
-	digitalWrite(6, HIGH);
-	digitalWrite(7, HIGH);
+	setPort4High();
+	setPort5High();
+	setPort6High();
+	setPort7High();
 	delayMicroseconds(escLowLimit - 100);
-	digitalWrite(4, LOW);
-	digitalWrite(5, LOW);
-	digitalWrite(6, LOW);
-	digitalWrite(7, LOW);
+	setPort4Low();
+	setPort5Low();
+	setPort6Low();
+	setPort7Low();
 };
 
 void Motors::staySilent() {
@@ -55,35 +56,35 @@ void Motors::staySilent() {
 };
 
 void Motors::outputBackLeft(uint16_t duration) {
-	digitalWrite(4, HIGH);				//Turn on pin 4
+	setPort4High();				//Turn on pin 4
 	delayMicroseconds(duration);
-	digitalWrite(4, LOW);				//Turn off pin 4
+	setPort4Low();				//Turn off pin 4
 };
 
 void Motors::outputFrontLeft(uint16_t duration) {
-	digitalWrite(5, HIGH);				//Turn on pin 5
+	setPort5High();				//Turn on pin 5
 	delayMicroseconds(duration);
-	digitalWrite(5, LOW);				//Turn off pin 5
+	setPort5Low();				//Turn off pin 5
 };
 
 void Motors::outputBackRight(uint16_t duration) {
-	digitalWrite(6, HIGH);				//Turn on pin 6
+	setPort6High();				//Turn on pin 6
 	delayMicroseconds(duration);
-	digitalWrite(6, LOW);				//Turn off pin 6
+	setPort6Low();				//Turn off pin 6
 };
 
 void Motors::outputFrontRight(uint16_t duration) {
-	digitalWrite(7, HIGH);				//Turn on pin 7
+	setPort7High();				//Turn on pin 7
 	delayMicroseconds(duration);
-	digitalWrite(7, LOW);				//Turn off pin 7
+	setPort7Low();				//Turn off pin 7
 };
 
 void Motors::outputAll(uint16_t throttle, int16_t pitch, int16_t roll, int16_t yaw) {
-	byte on = B00001111;
-	digitalWrite(4, HIGH);
-	digitalWrite(5, HIGH);
-	digitalWrite(6, HIGH);
-	digitalWrite(7, HIGH);
+	uint8_t on = B00001111;
+	setPort4High();
+	setPort5High();
+	setPort6High();
+	setPort7High();
 	uint32_t currentTime = micros();
 	uint32_t frontLeft 	= currentTime + throttle - pitch + roll + yaw;
 	uint32_t frontRight = currentTime + throttle - pitch - roll - yaw;
@@ -92,19 +93,19 @@ void Motors::outputAll(uint16_t throttle, int16_t pitch, int16_t roll, int16_t y
 	while (on > B00000001) {
 		currentTime = micros();
 		if (currentTime >= backLeft) {
-			digitalWrite(4, LOW);
+			setPort4Low();
 			on &= B00001110;
 		};
 		if (currentTime >= frontLeft) {
-			digitalWrite(5, LOW);
+			setPort5Low();
 			on &= B00001101;
 		};
 		if (currentTime >= backRight) {
-			digitalWrite(6, LOW);
+			setPort6Low();
 			on &= B00001011;
 		};
 		if (currentTime >= frontRight) {
-			digitalWrite(7, LOW);
+			setPort7Low();
 			on &= B00000111;
 		};
 	};

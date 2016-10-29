@@ -1,3 +1,4 @@
+#include "portable.h"
 #ifndef CONFIG_DRONE_H
 	#define CONFIG_DRONE_H
 //#define DEBUG
@@ -67,5 +68,17 @@ static const uint16_t escLowLimit = 1060;
 static const uint16_t escHighLimit = 1860;
 static const uint16_t escArmMicros = 40000;
 
+#define setPort4High()	SET_MMIO_BIT(SOC_GPIO_BASE_ADDR, 19)
+#define setPort4Low()  	CLEAR_MMIO_BIT(SOC_GPIO_BASE_ADDR, 19)
+#define setPort5High() 	SET_ARC_BIT(SS_GPIO_8B1_BASE_ADDR, 3)
+#define setPort5Low()	CLEAR_ARC_BIT(SS_GPIO_8B1_BASE_ADDR, 3)
+#define setPort6High()	SET_ARC_BIT(SS_GPIO_8B1_BASE_ADDR, 4)
+#define setPort6Low()	CLEAR_ARC_BIT(SS_GPIO_8B1_BASE_ADDR, 4)
+#define setPort7High()	SET_MMIO_BIT(SOC_GPIO_BASE_ADDR, 20)
+#define setPort7Low()	CLEAR_MMIO_BIT(SOC_GPIO_BASE_ADDR, 20)
+#define setPort12High()	SET_ARC_BIT(SOC_GPIO_BASE_ADDR, 9)
+#define setPort12Low()	CLEAR_ARC_BIT(SOC_GPIO_BASE_ADDR, 9)
+#define setPort13High() SET_ARC_BIT(SOC_GPIO_BASE_ADDR, 8)
+#define setPort13Low()	CLEAR_ARC_BIT(SOC_GPIO_BASE_ADDR, 8)
 
 #endif
