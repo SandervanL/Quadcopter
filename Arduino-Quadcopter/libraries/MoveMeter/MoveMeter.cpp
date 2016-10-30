@@ -70,14 +70,6 @@ double MoveMeter::getRoll() {
 //If you use this function, only use this function
 void MoveMeter::getPitchRoll(double &pitch, double &roll) {
 	accelGyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-#ifdef DEBUG
-	Serial.print(ax);	Serial.print(",");
-	Serial.print(ay);	Serial.print(",");
-	Serial.print(az);	Serial.print(",");
-	Serial.print(gx);	Serial.print(",");
-	Serial.print(gy);	Serial.print(",");
-	Serial.print(gz);	Serial.print(",");
-#endif
 	if (!firstAngle) {
 		_pitch = compCoeff*(_pitch + (gy * timeConstant / gyroSensitivity)) + (1.0f - compCoeff) * atan2(ax, sqrt((long)ay*ay + (long) az*az)) * 3.0 * RAD_TO_DEG;
 		_roll =  compCoeff*(_roll  +(-gx * timeConstant / gyroSensitivity)) + (1.0f - compCoeff) * atan2(ay, sqrt((long)ax*ax + (long) az*az)) * 3.0 * RAD_TO_DEG;
@@ -86,7 +78,18 @@ void MoveMeter::getPitchRoll(double &pitch, double &roll) {
 	} else {
 		_pitch = atan2(ax, sqrt((long)ay*ay + (long) az*az)) * 3.0 * RAD_TO_DEG;
 		_roll  = atan2(ay, sqrt((long)ax*ax + (long) az*az)) * 3.0 * RAD_TO_DEG;
+		firstAngle = false;
 	}
+#ifdef DEBUG
+	Serial.print(ax);		Serial.print(",");
+	Serial.print(ay);		Serial.print(",");
+	Serial.print(az);		Serial.print(",");
+	Serial.print(gx);		Serial.print(",");
+	Serial.print(gy);		Serial.print(",");
+	Serial.print(gz);		Serial.print(",");
+	Serial.print(_pitch);	Serial.print(",");
+	Serial.print(_roll);	Serial.print(",");
+#endif
 	pitch =  _pitch;
 	roll =  _roll;
 };
