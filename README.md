@@ -7,3 +7,5 @@ The Arduino-Quadcopter is quadcopter software based on the Arduino UNO R3 (ATmeg
 The Arduino101-Quadcopter is the same software, but adapted for the Arduino 101.
 Compile the code by making the downloaded folder the Sketchbook Location of your Android IDE (File->Preferences->Sketchbook Location).
 Everything should run normally.
+
+The Visualize Arduino files are used for analyzing the serial data of the Arduino.
