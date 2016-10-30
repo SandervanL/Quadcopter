@@ -9,7 +9,7 @@
 
 //Radio control variables, micros() returns a uint32_t
 volatile uint16_t signals[8];   //Array which contains the signals of the remote control in microseconds (updated by ISR(PCINT_vect))
-volatile uint32_t signalBegin[8];        //Array with beginvalues of the remote-control signals
+volatile uint32_t signalBegin[8] = {0};        //Array with beginvalues of the remote-control signals
 volatile uint32_t currentMicroTime;      //Variable used by ISR(PCINT0_vect) to store the current time in
 
 //Chip, calculation and motor variables
@@ -26,7 +26,7 @@ uint32_t beginTimeOfNextLoop = 0;     //Stores the time at which the next loop s
 
 void setup() {
 #ifdef DEBUG
-  Serial.begin(9600);                       //Initialize serial bus if we want to debug our code
+  Serial.begin(38400);                       //Initialize serial bus if we want to debug our code
   Serial.println("Online!");
 #endif
   Wire.begin();                               //Initialize I2C bus
@@ -93,18 +93,17 @@ void loop() {
   moveMeter.getPitchRoll(mpuPitch, mpuRoll);//Get pitch and roll (in degrees)
   mpuPitch *= -1.0;                             //Compensate for placing the MPU9150 the other way around
   mpuRoll  *= -1.0;
-
-  //escLowLimit - 200 to have some free space for the roll, pitch and yaw
-  throttle = (uint16_t) ((signals[throttleChannel] - throttleLowLimit) * (double)(escHighLimit - 200 - escLowLimit) / (throttleHighLimit - throttleLowLimit) + escLowLimit);
   
   //I don't use return, because I may want to DEBUG
-  if (startState == 2 && throttle > 1080) {
+  if (startState == 2 && signals[throttleChannel] > 1080) {
     //Only compute PID when we have input; we don't want the PID to keep trying to correct while we don't output any signal
     calculator.PIDPitchRoll(signals, mpuPitch, mpuRoll, pitch, roll); //Calculate the wanted pitch and roll output
 
     //Calculate the throttle and yaw from the remote control
     //throttleChannel, throttleLowLimit, throttleHighLimit, yawChannel, radioLowLimit and radioHighLimit are defined in Calculator.h
     //escLowLimit and escHighLimit are defined in Motors.h
+    //escLowLimit - 200 to have some free space for the roll, pitch and yaw
+    throttle = (uint16_t) ((signals[throttleChannel] - throttleLowLimit) * (double)(escHighLimit - 200 - escLowLimit) / (throttleHighLimit - throttleLowLimit) + escLowLimit);
     yaw = (signals[yawChannel] - radioLowLimit) * (2.0 * yawMaxValue) / (radioHighLimit - radioLowLimit) - yawMaxValue;
 
     //Checking if throttle and yaw are within the specified range. Else, adjust. The specified range is yawMaxValue defined in Calculator.h
@@ -122,13 +121,7 @@ void loop() {
   }
 #ifdef DEBUG
   //Print all the data which is just collected to the serial monitor on the computer
-  //MPUPitch and MPURoll are taken care of in the MoveMeter library
-  Serial.print(mpuPitch);                     Serial.print(",");
-  Serial.print(mpuRoll);                      Serial.print(",");
-  Serial.print(throttle + pitch - roll + yaw);Serial.print(",");
-  Serial.print(throttle + pitch + roll - yaw);Serial.print(",");
-  Serial.print(throttle - pitch - roll - yaw);Serial.print(",");
-  Serial.print(throttle - pitch + roll + yaw);Serial.print(",");
+  //MPUPitch and MPURoll are taken care of in the MoveMeter library, the motor values are taken care of in the Motor library
   Serial.print(signals[throttleChannel]);     Serial.print(",");
   Serial.print(signals[pitchChannel]);        Serial.print(",");
   Serial.print(signals[rollChannel]);         Serial.print(",");
@@ -144,8 +137,8 @@ void loop() {
 ISR (PCINT1_vect) {
   currentMicroTime = micros();
   //Channel 1
-  if ((PINC & B00000001) == 0) {              //Is input 8 high?
-    if (!signalBegin[0]) {                    //Input 8 changed from 0 to 1
+  if ((PINC & B00000001) ) {              //Is input 8 high?
+    if (signalBegin[0] == 0) {                    //Input 8 changed from 0 to 1
       signalBegin[0] = currentMicroTime;      //Remember the beginning of the pulse
     };
   } else if (signalBegin[0]) {               //Input 8 is not high and changed from 1 to 0
@@ -153,8 +146,8 @@ ISR (PCINT1_vect) {
     signalBegin[0] = 0;                       //Remember channel 1 is now low
   };
   //Channel 2
-  if ((PINC & B00000010) == 0) {              //Is input 9 high?
-    if (!signalBegin[1]) {                    //Input 9 changed from 0 to 1
+  if ((PINC & B00000010) ) {              //Is input 9 high?
+    if (signalBegin[1] == 0) {                    //Input 9 changed from 0 to 1
       signalBegin[1] = currentMicroTime;      //Remember the beginning of the pulse
     };
   } else if (signalBegin[1]) {                //Input 9 is not high and changed from 1 to 0
@@ -162,8 +155,8 @@ ISR (PCINT1_vect) {
     signalBegin[1] = 0;                       //Remember channel 2 is now low
   };
   //Channel 3
-  if ((PINC & B00000100) == 0) {              //Is input 10 high?
-    if (!signalBegin[2]) {                    //Input 10 changed from 0 to 1
+  if ((PINC & B00000100) ) {              //Is input 10 high?
+    if (signalBegin[2] == 0) {                    //Input 10 changed from 0 to 1
       signalBegin[2] = currentMicroTime;      //Remember the beginning of the pulse
     };
   } else if (signalBegin[2]) {                //Input 10 is not high and changed from 1 to 0
@@ -171,8 +164,8 @@ ISR (PCINT1_vect) {
     signalBegin[2] = 0;                       //Remember channel 3 is now low
   };
   //Channel 4
-  if ((PINC & B00001000) == 0) {              //Is input 11 high?
-    if (!signalBegin[3]) {                    //Input 11 changed from 0 to 1
+  if ((PINC & B00001000) ) {              //Is input 11 high?
+    if (signalBegin[3] == 0) {                    //Input 11 changed from 0 to 1
       signalBegin[3] = currentMicroTime;      //Remember the beginning of the pulse
     };
   } else if (signalBegin[3]) {                 //Input 11 is not high and changed from 1 to 0
