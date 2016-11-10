@@ -112,12 +112,6 @@ void loop() {
   
 #ifdef DEBUG
    //Print all the data which is just collected to the serial monitor on the computer
-  Serial.print(mpuPitch);                     Serial.print(",");
-  Serial.print(mpuRoll);                      Serial.print(",");
-  Serial.print(throttle + pitch - roll + yaw);Serial.print(",");
-  Serial.print(throttle + pitch + roll - yaw);Serial.print(",");
-  Serial.print(throttle - pitch - roll - yaw);Serial.print(",");
-  Serial.print(throttle - pitch + roll + yaw);Serial.print(",");
   Serial.print(signals[throttleChannel]);     Serial.print(",");
   Serial.print(signals[pitchChannel]);        Serial.print(",");
   Serial.print(signals[rollChannel]);         Serial.print(",");

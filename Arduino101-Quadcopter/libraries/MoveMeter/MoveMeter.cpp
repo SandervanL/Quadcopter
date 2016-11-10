@@ -44,6 +44,10 @@ double MoveMeter::getRoll() {
 
 void MoveMeter::getPitchRoll(double &pitch, double &roll) {
 	CurieIMU.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+	ComplementaryPitch(timeConstant);
+	ComplementaryRoll(timeConstant);
+	pitch = _pitch * RAD_TO_DEG;
+	roll = _roll * RAD_TO_DEG;
 #ifdef DEBUG
 	Serial.print(ax);	Serial.print(",");
 	Serial.print(ay);	Serial.print(",");
@@ -51,11 +55,9 @@ void MoveMeter::getPitchRoll(double &pitch, double &roll) {
 	Serial.print(gx);	Serial.print(",");
 	Serial.print(gy);	Serial.print(",");
 	Serial.print(gz);	Serial.print(",");
+	Serial.print(pitch);Serial.print(",");
+	Serial.print(roll);	Serial.print(",");
 #endif
-	ComplementaryPitch(timeConstant);
-	ComplementaryRoll(timeConstant);
-	pitch = _pitch * RAD_TO_DEG;
-	roll = _roll * RAD_TO_DEG;
 };
 
 
