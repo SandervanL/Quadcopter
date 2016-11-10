@@ -75,6 +75,9 @@ void Motors::outputAll(uint16_t throttle, int16_t pitch, int16_t roll, int16_t y
 	uint32_t frontRight = currentTime + throttle + pitch + roll - yaw;
 	uint32_t backLeft 	= currentTime + throttle - pitch - roll - yaw;
 	uint32_t backRight 	= currentTime + throttle - pitch + roll + yaw;
+#ifdef DEBUG
+	uint32_t oldTime = currentTime;
+#endif
 	while (PORTD > B00001000) {
 		currentTime = micros();
 		if (currentTime >= backLeft) {
@@ -90,5 +93,10 @@ void Motors::outputAll(uint16_t throttle, int16_t pitch, int16_t roll, int16_t y
 			PORTD &= B01111111;
 		};
 	};
-	delayMicroseconds(1);
+#ifdef DEBUG
+	Serial.print(frontLeft - oldTime);	Serial.print(",");
+	Serial.print(frontRight - oldTime);	Serial.print(",");
+	Serial.print(backLeft - oldTime);	Serial.print(",");
+	Serial.print(backRight - oldTime);	Serial.print(",");
+#endif
 };
